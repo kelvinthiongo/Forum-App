@@ -9,6 +9,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 class LikeController extends Controller
 {
+
+    /**
+     * Create a new AuthController instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('jwt');
+    }
+
     public function likeIt(Reply $reply){
         if(Like::where('reply_id', $reply->id)->where('user_id', 1)->count() > 0){ //auth()->user()->id
             return response('Exists', Response::HTTP_FORBIDDEN);
