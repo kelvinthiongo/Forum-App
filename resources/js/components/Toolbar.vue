@@ -7,17 +7,8 @@
 
       <v-spacer></v-spacer>
       <div class="hidden-sm-and-down">
-        <router-link to="/forum">
-          <v-btn text>Forum</v-btn>
-        </router-link>
-        <router-link to="/ask-question">
-          <v-btn text>Ask Question</v-btn>
-        </router-link>
-        <router-link to="/category">
-          <v-btn text>Category</v-btn>
-        </router-link>
-        <router-link to="/login">
-          <v-btn text>Login</v-btn>
+        <router-link v-for="item in active_items" :key="item.title" :to="item.to">
+          <v-btn text>{{ item.title }}</v-btn>
         </router-link>
       </div>
       <v-btn icon>
@@ -29,7 +20,34 @@
 
 <script>
 export default {
-  name: "Toolbar"
+  name: "Toolbar",
+  data() {
+    return {
+      items: [
+        { title: "Forum", to: "/forum", show: true },
+        { title: "Ask Question", to: "/ask-question", show: User.loggedIn() },
+        { title: "Category", to: "/category", show: User.loggedIn() },
+        { title: "Login", to: "/login", show: !User.loggedIn() },
+        { title: "Logout", to: "/logout", show: User.loggedIn() }
+      ]
+    };
+  },
+  computed: {
+    active_items() {
+      let active = [];
+      this.items.map(item => {
+        if (item.show) {
+          active = [...active, item]
+        }
+      });
+      return active;
+    }
+  },
+  created () {
+      EventBus.$on('logout', () => {
+          User.logout();
+      });
+  },
 };
 </script>
 

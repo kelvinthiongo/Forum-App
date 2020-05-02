@@ -8,8 +8,7 @@ import * as axios from 'axios';
 
 window.User = User;
 window.axios = axios;
-
-console.log(User.id());
+window.EventBus = new Vue();
 
 Vue.use(Vuetify);
 

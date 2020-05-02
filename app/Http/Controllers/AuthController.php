@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SignupRequest;
 use App\User;
 use Illuminate\Http\Request;
 
@@ -35,9 +36,24 @@ class AuthController extends Controller
         return $this->respondWithToken($token);
     }
 
-    public function signup(Request $request){
-        User::create($request->all());
-        return $this->login($request);
+    public function signup(SignupRequest $request){
+
+        try {
+            $user = User::create($request->all());
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
+
+        if(!$user){
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        $credentials = request(['email', 'password']);
+
+        if (! $token = auth()->claims(['nam' => 'Kelvin'])->attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        return $this->respondWithToken($token);
     }
 
     /**

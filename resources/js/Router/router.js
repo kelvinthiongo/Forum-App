@@ -7,8 +7,24 @@ const routes = [
     {
         path: "/login",
         component: () =>
-        import(/* webpackChunkName: "bundle.login" */ '../components/login/Login'),
-    }
+        import('../components/login/Login'),
+    },
+    {
+        path: "/logout",
+        component: () =>
+        import('../components/login/Logout'),
+    },
+    {
+        path: "/signup",
+        component: () =>
+        import('../components/login/Signup'),
+    },
+    {
+        path: "/forum",
+        component: () =>
+        import('../components/forum/Forum'),
+        name: 'forum',
+    },
 ];
 
 const router = new Router({
