@@ -5,6 +5,10 @@ Vue.use(Router);
 
 const routes = [
     {
+        path: "/",
+        redirect: "/forum",
+    },
+    {
         path: "/login",
         component: () =>
         import('../components/login/Login'),
@@ -24,6 +28,18 @@ const routes = [
         component: () =>
         import('../components/forum/Forum'),
         name: 'forum',
+    },
+    {
+        path: "/question/:slug",
+        component: () =>
+        import('../components/forum/read'),
+        name: 'read',
+    },
+    {
+        path: "/ask-question",
+        component: () =>
+        import('../components/forum/create'),
+        name: 'create',
     },
 ];
 
