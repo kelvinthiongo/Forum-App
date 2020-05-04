@@ -2127,7 +2127,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       }, {
         title: "Category",
         to: "/category",
-        show: User.loggedIn()
+        show: User.admin()
       }, {
         title: "Login",
         to: "/login",
@@ -2182,24 +2182,34 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       form: {
         email: null,
         password: null
-      }
+      },
+      errors: {}
     };
   },
   methods: {
     login: function login() {
-      User.login(this.form);
+      var result = User.login(this.form);
+
+      if (result != "success") {
+        this.errors = {
+          email: ['Invalid credentials']
+        };
+      }
     }
   },
   created: function created() {
     if (User.loggedIn()) {
       this.$router.push({
-        name: 'forum'
+        name: "forum"
       });
     }
   }
@@ -38245,6 +38255,12 @@ var render = function() {
             }
           }),
           _vm._v(" "),
+          _vm.errors.email
+            ? _c("span", { staticClass: "red--text" }, [
+                _vm._v(_vm._s(_vm.errors.email[0]))
+              ])
+            : _vm._e(),
+          _vm._v(" "),
           _c("v-text-field", {
             attrs: { label: "Password", type: "password", required: "" },
             model: {
@@ -38255,6 +38271,12 @@ var render = function() {
               expression: "form.password"
             }
           }),
+          _vm._v(" "),
+          _vm.errors.password
+            ? _c("span", { staticClass: "red--text" }, [
+                _vm._v(_vm._s(_vm.errors.password[0]))
+              ])
+            : _vm._e(),
           _vm._v(" "),
           _c("v-btn", { attrs: { color: "success", type: "submit" } }, [
             _vm._v("Login")
@@ -95310,6 +95332,11 @@ var User = /*#__PURE__*/function () {
     value: function own(id) {
       return this.id() == id;
     }
+  }, {
+    key: "admin",
+    value: function admin() {
+      return this.id() == 1;
+    }
   }]);
 
   return User;
@@ -95345,31 +95372,37 @@ var routes = [{
 }, {
   path: "/logout",
   component: function component() {
-    return __webpack_require__.e(/*! import() */ 2).then(__webpack_require__.bind(null, /*! ../components/login/Logout */ "./resources/js/components/login/Logout.vue"));
+    return __webpack_require__.e(/*! import() */ 5).then(__webpack_require__.bind(null, /*! ../components/login/Logout */ "./resources/js/components/login/Logout.vue"));
   }
 }, {
   path: "/signup",
   component: function component() {
-    return __webpack_require__.e(/*! import() */ 1).then(__webpack_require__.bind(null, /*! ../components/login/Signup */ "./resources/js/components/login/Signup.vue"));
+    return __webpack_require__.e(/*! import() */ 4).then(__webpack_require__.bind(null, /*! ../components/login/Signup */ "./resources/js/components/login/Signup.vue"));
   }
 }, {
   path: "/forum",
   component: function component() {
-    return __webpack_require__.e(/*! import() */ 0).then(__webpack_require__.bind(null, /*! ../components/forum/Forum */ "./resources/js/components/forum/Forum.vue"));
+    return __webpack_require__.e(/*! import() */ 1).then(__webpack_require__.bind(null, /*! ../components/forum/Forum */ "./resources/js/components/forum/Forum.vue"));
   },
   name: 'forum'
 }, {
   path: "/question/:slug",
   component: function component() {
-    return __webpack_require__.e(/*! import() */ 3).then(__webpack_require__.bind(null, /*! ../components/forum/read */ "./resources/js/components/forum/read.vue"));
+    return __webpack_require__.e(/*! import() */ 0).then(__webpack_require__.bind(null, /*! ../components/forum/read */ "./resources/js/components/forum/read.vue"));
   },
   name: 'read'
 }, {
   path: "/ask-question",
   component: function component() {
-    return __webpack_require__.e(/*! import() */ 4).then(__webpack_require__.bind(null, /*! ../components/forum/create */ "./resources/js/components/forum/create.vue"));
+    return __webpack_require__.e(/*! import() */ 3).then(__webpack_require__.bind(null, /*! ../components/forum/create */ "./resources/js/components/forum/create.vue"));
   },
   name: 'create'
+}, {
+  path: "/category",
+  component: function component() {
+    return __webpack_require__.e(/*! import() */ 2).then(__webpack_require__.bind(null, /*! ../components/category/CreateCategory */ "./resources/js/components/category/CreateCategory.vue"));
+  },
+  name: 'category'
 }];
 var router = new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
   mode: 'history',

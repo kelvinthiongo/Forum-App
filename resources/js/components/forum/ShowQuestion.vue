@@ -10,8 +10,9 @@
         </span>
       </div>
       <v-spacer></v-spacer>
-      <v-btn color="teal">5 replies</v-btn>
+      <v-btn color="teal" dark>{{ question.reply_count }} replies</v-btn>
       <v-card-text v-html="body"></v-card-text>
+      <v-divider></v-divider>
       <v-card-actions v-if="own">
         <v-btn icon small>
           <v-icon color="orange" @click="edit">edit</v-icon>

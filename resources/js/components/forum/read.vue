@@ -2,12 +2,18 @@
   <div v-if="question">
     <edit-question v-if="editing" :question="question"></edit-question>
     <show-question :question="question" v-else></show-question>
+    <v-container>
+      <replies :question="question"></replies>
+      <new-reply :question_slug="question.slug"></new-reply>
+    </v-container>
   </div>
 </template>
 
 <script>
 import ShowQuestion from "./ShowQuestion";
 import EditQuestion from "./editQuestion";
+import Replies from "../reply/Replies";
+import NewReply from "../reply/NewReply";
 export default {
   data() {
     return {
@@ -21,15 +27,17 @@ export default {
   },
   components: {
     ShowQuestion,
-    EditQuestion
+    EditQuestion,
+    Replies,
+    NewReply
   },
   methods: {
     listen() {
       EventBus.$on("startEditing", () => {
         this.editing = true;
       });
-      EventBus.$on('cancelEditing', () => {
-          this.editing = false
+      EventBus.$on("cancelEditing", () => {
+        this.editing = false;
       });
     },
     getQuestion() {

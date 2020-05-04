@@ -41,6 +41,12 @@ const routes = [
         import('../components/forum/create'),
         name: 'create',
     },
+    {
+        path: "/category",
+        component: () =>
+        import('../components/category/CreateCategory'),
+        name: 'category',
+    },
 ];
 
 const router = new Router({

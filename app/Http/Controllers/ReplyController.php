@@ -39,9 +39,9 @@ class ReplyController extends Controller
      */
     public function store(Question $question, Request $request)
     {
-        $reply = $question->replies()->create([
+        $reply = $question->replies()->create(
             $request->all(),
-        ]);
+        );
 
         return response(['reply' => new ReplyResource($reply)], Response::HTTP_CREATED);
     }
@@ -77,7 +77,7 @@ class ReplyController extends Controller
      * @param  \App\Model\Reply  $reply
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Reply $reply)
+    public function destroy(Question $question, Reply $reply)
     {
         $reply->delete();
         return response(null, Response::HTTP_NO_CONTENT);
