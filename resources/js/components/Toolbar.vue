@@ -6,6 +6,7 @@
       <v-toolbar-title>Title</v-toolbar-title>
 
       <v-spacer></v-spacer>
+      <app-notification v-if="loggedIn"></app-notification>
       <div class="hidden-sm-and-down">
         <router-link v-for="item in active_items" :key="item.title" :to="item.to">
           <v-btn text>{{ item.title }}</v-btn>
@@ -19,6 +20,7 @@
 </template>
 
 <script>
+import AppNotification from "./AppNotification"
 export default {
   name: "Toolbar",
   data() {
@@ -29,8 +31,12 @@ export default {
         { title: "Category", to: "/category", show: User.admin() },
         { title: "Login", to: "/login", show: !User.loggedIn() },
         { title: "Logout", to: "/logout", show: User.loggedIn() }
-      ]
+      ],
+      loggedIn: User.loggedIn(),
     };
+  },
+  components: {
+      AppNotification,
   },
   computed: {
     active_items() {

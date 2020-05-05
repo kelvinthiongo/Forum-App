@@ -6,6 +6,8 @@
           class="grey--text"
           style="font-size: 14px"
         >{{ reply.user }} | posted {{ reply.created_at }}</span>
+        <v-spacer></v-spacer>
+        <like :content="reply"></like>
       </v-card-title>
       <v-divider></v-divider>
 
@@ -29,16 +31,17 @@
 
 <script>
 import EditReply from "./EditReply";
+import Like from "../likes/like"
 export default {
   name: "Reply",
   data() {
     return {
       editing: false,
-      content: null
+      beforeEditReplyBody: this.reply.body
     };
   },
   components: {
-    EditReply
+    EditReply, Like
   },
   props: {
     reply: {
@@ -49,13 +52,18 @@ export default {
   methods: {
     edit() {
       this.editing = true;
+      this.beforeEditReplyBody = this.reply.body;
     },
     destroy() {
       EventBus.$emit("deleteReply", this.index);
     },
     listen() {
-      EventBus.$on("cancelEditing", () => {
+      EventBus.$on("cancelEditing", (body) => {
         this.editing = false;
+        if(body !== this.reply.body){
+            this.reply.body = this.beforeEditReplyBody;
+        }
+
       });
     }
   },
@@ -64,12 +72,11 @@ export default {
       return User.own(this.reply.user_id);
     },
     body() {
-      return md.parse(this.content);
+      return md.parse(this.reply.body);
     },
   },
   created() {
     this.listen();
-    this.content = this.reply.body
   }
 };
 </script>

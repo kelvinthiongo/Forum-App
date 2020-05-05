@@ -30,7 +30,7 @@ export default {
   name: "ShowQuestion",
   data() {
     return {
-      own: User.own(this.question.user_id)
+      own: User.own(this.question.user_id),
     };
   },
   props: {

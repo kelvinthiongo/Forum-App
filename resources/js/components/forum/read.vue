@@ -18,7 +18,8 @@ export default {
   data() {
     return {
       question: null,
-      editing: false
+      editing: false,
+      beforeEditBody: null
     };
   },
   created() {
@@ -35,8 +36,12 @@ export default {
     listen() {
       EventBus.$on("startEditing", () => {
         this.editing = true;
+        this.beforeEditBody = this.question.body;
       });
-      EventBus.$on("cancelEditing", () => {
+      EventBus.$on("cancelEditing", body => {
+        if (this.question.body !== body) {
+          this.question.body = this.beforeEditBody;
+        }
         this.editing = false;
       });
     },

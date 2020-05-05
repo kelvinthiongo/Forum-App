@@ -1,6 +1,6 @@
 <template>
   <div class="mt-4">
-    <vue-simplemde v-model="body" />
+    <vue-simplemde v-model="reply.body" />
     <v-btn icon small @click="update">
       <v-icon color="orange">save</v-icon>
     </v-btn>
@@ -13,29 +13,19 @@
 <script>
 import VueSimplemde from "vue-simplemde";
 export default {
-    data() {
-        return {
-            body: null
-        }
-    },
-  props: {
-    reply: {
-      default: {}
-    }
-  },
+  props: ['reply'],
   components: {
     VueSimplemde
   },
   methods: {
     update() {
-        axios.put(`/api/question/${this.reply.question_slug}/reply/${this.reply.id}`, {body: this.body})
+        axios.put(`/api/question/${this.reply.question_slug}/reply/${this.reply.id}`, {body: this.reply.body})
         .then( () => {
-            EventBus.$emit("updateReply", this.body);
-            this.cancel()
+            this.cancel(this.reply.body)
         });
     },
-    cancel() {
-      EventBus.$emit("cancelEditing");
+    cancel(body) {
+      EventBus.$emit("cancelEditing", body);
     }
   },
   created () {

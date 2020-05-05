@@ -41,12 +41,12 @@ export default {
       this.form = this.question;
   },
   methods: {
-      cancel() {
-          EventBus.$emit('cancelEditing');
+      cancel(body) {
+          EventBus.$emit('cancelEditing', body);
       },
       update(){
           axios.put(`/api/question/${this.form.slug}`, this.form)
-          .then(res => this.cancel());
+          .then(res => this.cancel(this.question.body));
       }
   },
 };

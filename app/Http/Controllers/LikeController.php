@@ -21,17 +21,15 @@ class LikeController extends Controller
     }
 
     public function likeIt(Reply $reply){
-        if(Like::where('reply_id', $reply->id)->where('user_id', 1)->count() > 0){ //auth()->user()->id
+        if(Like::where('reply_id', $reply->id)->where('user_id', auth()->user()->id)->count() > 0){
             return response('Exists', Response::HTTP_FORBIDDEN);
         }
         $reply->likes()->create([
-            // 'user_id' => auth()->user()->id,
-            'user_id' => 1,
+            'user_id' => auth()->id(),
         ]);
     }
 
     public function UnLikeIt(Reply $reply){
-        // $reply->likes()->where('user_id', auth()->user()->id)->first()->delete();
-        $reply->likes()->where('user_id', 1)->first()->delete();
+        $reply->likes()->where('user_id', auth()->id())->first()->delete();
     }
 }
