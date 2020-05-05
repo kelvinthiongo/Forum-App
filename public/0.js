@@ -270,8 +270,17 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     color: function color() {
-      return this.liked ? 'red' : 'red lighten-4';
+      return this.liked ? "red" : "red lighten-4";
     }
+  },
+  created: function created() {
+    var _this3 = this;
+
+    Echo.channel("likeChannel").listen("LikeEvent", function (e) {
+      if (_this3.content.id == e.id) {
+        e.type == 1 ? _this3.count++ : _this3.count--;
+      }
+    });
   }
 });
 
@@ -413,13 +422,23 @@ __webpack_require__.r(__webpack_exports__);
     listen: function listen() {
       var _this = this;
 
-      EventBus.$on('NewReply', function (reply) {
+      EventBus.$on("NewReply", function (reply) {
         _this.content.unshift(reply);
       });
-      EventBus.$on('deleteReply', function (index) {
+      EventBus.$on("deleteReply", function (index) {
         axios["delete"]("/api/question/".concat(_this.question.slug, "/reply/").concat(parseInt(_this.content[index].id))).then(function (res) {
           return _this.content.splice(index, 1);
         });
+      });
+      Echo["private"]("App.User." + User.id()).notification(function (notification) {
+        _this.content.unshift(notification.reply);
+      });
+      Echo.channel('deleteReplyChannel').listen('DeleteReplyEvent', function (e) {
+        for (var index = 0; index < _this.content.length; index++) {
+          if (_this.content[index].id == e.id) {
+            _this.content.splice(index, 1);
+          }
+        }
       });
     }
   },
