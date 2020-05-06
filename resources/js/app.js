@@ -4,10 +4,12 @@ window.Vue = require('vue');
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import User from './Helpers/User';
+import Exception from './Helpers/Exception';
 import * as axios from 'axios';
 import VueSimplemde from 'vue-simplemde';
 
 window.User = User;
+window.Exception = Exception;
 window.axios = axios;
 window.EventBus = new Vue();
 

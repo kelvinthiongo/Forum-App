@@ -28,6 +28,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "Create",
@@ -39,7 +42,7 @@ __webpack_require__.r(__webpack_exports__);
         body: null
       },
       categories: {},
-      errors: null
+      errors: {}
     };
   },
   created: function created() {
@@ -56,13 +59,18 @@ __webpack_require__.r(__webpack_exports__);
       axios.post("/api/question", this.form).then(function (res) {
         return _this2.$router.push(res.data.path);
       })["catch"](function (error) {
-        _this2.errors = error.response.data;
-        console.log(_this2.errors);
+        _this2.errors = error.response.data.errors;
+        Exception.handleError(error);
       });
     }
   },
   components: {
     VueSimplemde: vue_simplemde__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
+  computed: {
+    disabled: function disabled() {
+      return !(this.form.title && this.form.body && this.form.category_id);
+    }
   }
 });
 
@@ -97,6 +105,12 @@ var render = function() {
           }
         },
         [
+          _vm.errors.title
+            ? _c("span", { staticClass: "red--text" }, [
+                _vm._v(_vm._s(_vm.errors.title[0]))
+              ])
+            : _vm._e(),
+          _vm._v(" "),
           _c("v-text-field", {
             attrs: { label: "Title", type: "text", required: "" },
             model: {
@@ -107,6 +121,12 @@ var render = function() {
               expression: "form.title"
             }
           }),
+          _vm._v(" "),
+          _vm.errors.category_id
+            ? _c("span", { staticClass: "red--text" }, [
+                _vm._v(_vm._s(_vm.errors.category_id[0]))
+              ])
+            : _vm._e(),
           _vm._v(" "),
           _c("v-select", {
             attrs: {
@@ -124,6 +144,12 @@ var render = function() {
               expression: "form.category_id"
             }
           }),
+          _vm._v(" "),
+          _vm.errors.body
+            ? _c("span", { staticClass: "red--text" }, [
+                _vm._v(_vm._s(_vm.errors.body[0]))
+              ])
+            : _vm._e(),
           _vm._v(" "),
           _c("vue-simplemde", {
             model: {

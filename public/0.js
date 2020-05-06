@@ -40,7 +40,8 @@ __webpack_require__.r(__webpack_exports__);
   name: "ShowQuestion",
   data: function data() {
     return {
-      own: User.own(this.question.user_id)
+      own: User.own(this.question.user_id),
+      replyCount: this.question.reply_count
     };
   },
   props: {
@@ -61,12 +62,22 @@ __webpack_require__.r(__webpack_exports__);
       axios["delete"]("/api/question/".concat(this.question.slug)).then(function (res) {
         return _this.$router.push('/forum');
       })["catch"](function (error) {
-        return console.log(error.response.data);
+        return Exception.handleError(error);
       });
     },
     edit: function edit() {
       EventBus.$emit('startEditing');
     }
+  },
+  created: function created() {
+    var _this2 = this;
+
+    EventBus.$on("IncReplyCount", function () {
+      _this2.replyCount++;
+    });
+    EventBus.$on("DecReplyCount", function () {
+      _this2.replyCount--;
+    });
   }
 });
 
@@ -125,14 +136,21 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     cancel: function cancel(body) {
-      EventBus.$emit('cancelEditing', body);
+      EventBus.$emit("cancelEditing", body);
     },
     update: function update() {
       var _this = this;
 
       axios.put("/api/question/".concat(this.form.slug), this.form).then(function (res) {
         return _this.cancel(_this.question.body);
+      })["catch"](function (error) {
+        return Exception.handleError(error);
       });
+    }
+  },
+  computed: {
+    disabled: function disabled() {
+      return !(this.form.title && this.form.body);
     }
   }
 });
@@ -152,6 +170,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _editQuestion__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./editQuestion */ "./resources/js/components/forum/editQuestion.vue");
 /* harmony import */ var _reply_Replies__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../reply/Replies */ "./resources/js/components/reply/Replies.vue");
 /* harmony import */ var _reply_NewReply__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../reply/NewReply */ "./resources/js/components/reply/NewReply.vue");
+//
+//
+//
 //
 //
 //
@@ -207,8 +228,13 @@ __webpack_require__.r(__webpack_exports__);
       axios.get("/api/question/".concat(this.$route.params.slug)).then(function (res) {
         return _this2.question = res.data.data;
       })["catch"](function (error) {
-        return console.log(error.response.data);
+        return Exception.handleError(error);
       });
+    }
+  },
+  computed: {
+    loggedIn: function loggedIn() {
+      return User.loggedIn();
     }
   }
 });
@@ -322,6 +348,8 @@ __webpack_require__.r(__webpack_exports__);
         body: this.reply.body
       }).then(function () {
         _this.cancel(_this.reply.body);
+      })["catch"](function (error) {
+        return Exception.handleError(error);
       });
     },
     cancel: function cancel(body) {
@@ -378,7 +406,10 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (res) {
         _this.body = '';
         EventBus.$emit('NewReply', res.data.reply);
+        EventBus.$emit("IncReplyCount");
         window.scrollTo(0, 0);
+      })["catch"](function (error) {
+        return Exception.handleError(error);
       });
     }
   }
@@ -427,13 +458,21 @@ __webpack_require__.r(__webpack_exports__);
       });
       EventBus.$on("deleteReply", function (index) {
         axios["delete"]("/api/question/".concat(_this.question.slug, "/reply/").concat(parseInt(_this.content[index].id))).then(function (res) {
-          return _this.content.splice(index, 1);
+          _this.content.splice(index, 1);
+
+          EventBus.$emit("DecReplyCount");
         });
       });
-      Echo["private"]("App.User." + User.id()).notification(function (notification) {
-        _this.content.unshift(notification.reply);
+      Echo.channel("newReplyChannel").listen("NewReplyEvent", function (e) {
+        if (User.id() != e.reply.user_id) {
+          EventBus.$emit("IncReplyCount");
+
+          _this.content.unshift(e.reply);
+        }
       });
-      Echo.channel('deleteReplyChannel').listen('DeleteReplyEvent', function (e) {
+      Echo.channel("deleteReplyChannel").listen("DeleteReplyEvent", function (e) {
+        EventBus.$emit("DecReplyCount");
+
         for (var index = 0; index < _this.content.length; index++) {
           if (_this.content[index].id == e.id) {
             _this.content.splice(index, 1);
@@ -593,7 +632,7 @@ var render = function() {
           _c("v-spacer"),
           _vm._v(" "),
           _c("v-btn", { attrs: { color: "teal", dark: "" } }, [
-            _vm._v(_vm._s(_vm.question.reply_count) + " replies")
+            _vm._v(_vm._s(_vm.replyCount) + " replies")
           ]),
           _vm._v(" "),
           _c("v-card-text", { domProps: { innerHTML: _vm._s(_vm.body) } }),
@@ -706,7 +745,13 @@ var render = function() {
                 [
                   _c(
                     "v-btn",
-                    { attrs: { small: "", type: "submit" } },
+                    {
+                      attrs: {
+                        small: "",
+                        type: "submit",
+                        disabled: _vm.disabled
+                      }
+                    },
                     [
                       _c("v-icon", { attrs: { color: "teal" } }, [
                         _vm._v("save")
@@ -772,7 +817,20 @@ var render = function() {
             [
               _c("replies", { attrs: { question: _vm.question } }),
               _vm._v(" "),
-              _c("new-reply", { attrs: { question_slug: _vm.question.slug } })
+              _vm.loggedIn
+                ? _c("new-reply", {
+                    attrs: { question_slug: _vm.question.slug }
+                  })
+                : _c(
+                    "div",
+                    { staticClass: "mt-4" },
+                    [
+                      _c("router-link", { attrs: { to: "/login" } }, [
+                        _vm._v("Log in to Reply")
+                      ])
+                    ],
+                    1
+                  )
             ],
             1
           )

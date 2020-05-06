@@ -5,7 +5,7 @@
         <v-text-field v-model="form.title" label="Title" type="text" required></v-text-field>
         <vue-simplemde v-model="form.body" />
         <v-card-actions>
-          <v-btn small type="submit">
+          <v-btn small type="submit" :disabled="disabled">
             <v-icon color="teal">save</v-icon>
           </v-btn>
           <v-btn icon small @click="cancel">
@@ -33,22 +33,29 @@ export default {
     VueSimplemde
   },
   props: {
-      question: {
-          default: {}
-      },
+    question: {
+      default: {}
+    }
   },
-  created () {
-      this.form = this.question;
+  created() {
+    this.form = this.question;
   },
   methods: {
-      cancel(body) {
-          EventBus.$emit('cancelEditing', body);
-      },
-      update(){
-          axios.put(`/api/question/${this.form.slug}`, this.form)
-          .then(res => this.cancel(this.question.body));
-      }
+    cancel(body) {
+      EventBus.$emit("cancelEditing", body);
+    },
+    update() {
+      axios
+        .put(`/api/question/${this.form.slug}`, this.form)
+        .then(res => this.cancel(this.question.body))
+        .catch(error => Exception.handleError(error));
+    }
   },
+  computed: {
+    disabled() {
+      return !(this.form.title && this.form.body);
+    }
+  }
 };
 </script>
 

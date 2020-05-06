@@ -33,19 +33,25 @@ export default {
               this.content[index].id
             )}`
           )
-          .then(res => this.content.splice(index, 1));
+          .then(res => {
+            this.content.splice(index, 1);
+            EventBus.$emit("DecReplyCount");
+          });
       });
 
-      Echo.private("App.User." + User.id()).notification(notification => {
-        this.content.unshift(notification.reply);
+      Echo.channel("newReplyChannel").listen("NewReplyEvent", e => {
+        if (User.id() != e.reply.user_id) {
+          EventBus.$emit("IncReplyCount");
+          this.content.unshift(e.reply);
+        }
       });
-      Echo.channel('deleteReplyChannel')
-      .listen('DeleteReplyEvent', e => {
-          for(let index = 0; index < this.content.length; index++){
-              if(this.content[index].id == e.id){
-                  this.content.splice(index, 1);
-              }
+      Echo.channel("deleteReplyChannel").listen("DeleteReplyEvent", e => {
+        EventBus.$emit("DecReplyCount");
+        for (let index = 0; index < this.content.length; index++) {
+          if (this.content[index].id == e.id) {
+            this.content.splice(index, 1);
           }
+        }
       });
     }
   },

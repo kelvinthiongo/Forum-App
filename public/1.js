@@ -90,7 +90,7 @@ __webpack_require__.r(__webpack_exports__);
     axios.get('/api/question').then(function (res) {
       return _this.questions = res.data.data;
     })["catch"](function (error) {
-      return console.log(error.response.data);
+      return Exception.handleError(error);
     });
   }
 });

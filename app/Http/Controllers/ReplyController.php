@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\DeleteReplyEvent;
+use App\Events\NewReplyEvent;
 use App\Http\Resources\ReplyResource;
 use App\Model\Question;
 use App\Model\Reply;
@@ -48,7 +49,7 @@ class ReplyController extends Controller
         if ($reply->user_id !== $question->user_id) {
             $user->notify(new NewReplyNotification($reply));
         }
-
+        broadcast(new NewReplyEvent(new ReplyResource($reply)))->toOthers();
         return response(['reply' => new ReplyResource($reply)], Response::HTTP_CREATED);
     }
 

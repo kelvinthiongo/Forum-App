@@ -31,7 +31,7 @@
         created () {
             axios.get('/api/question')
             .then(res => this.questions = res.data.data)
-            .catch(error => console.log(error.response.data));
+            .catch(error => Exception.handleError(error));
         },
     }
 </script>

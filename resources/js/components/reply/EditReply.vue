@@ -22,7 +22,8 @@ export default {
         axios.put(`/api/question/${this.reply.question_slug}/reply/${this.reply.id}`, {body: this.reply.body})
         .then( () => {
             this.cancel(this.reply.body)
-        });
+        })
+        .catch(error => Exception.handleError(error));
     },
     cancel(body) {
       EventBus.$emit("cancelEditing", body);

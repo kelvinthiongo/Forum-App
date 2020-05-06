@@ -29,8 +29,10 @@ export default {
             .then(res => {
                 this.body = '';
                 EventBus.$emit('NewReply', res.data.reply);
+                EventBus.$emit("IncReplyCount");
                 window.scrollTo(0,0);
             })
+            .catch(error => Exception.handleError(error));
         }
     },
 };

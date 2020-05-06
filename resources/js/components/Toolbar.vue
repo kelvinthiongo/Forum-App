@@ -1,9 +1,13 @@
 <template>
-  <v-card color="grey lighten-4" text height="50px" tile>
-    <v-toolbar dense>
+  <v-card color="grey lighten-4" text height="70px" tile>
+    <v-toolbar  color="indigo" height="70px" dark>
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
 
-      <v-toolbar-title>Title</v-toolbar-title>
+      <v-toolbar-title>
+          <router-link  to="/" class="white--text">
+              24Seven Devs
+          </router-link>
+      </v-toolbar-title>
 
       <v-spacer></v-spacer>
       <app-notification v-if="loggedIn"></app-notification>

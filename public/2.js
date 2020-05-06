@@ -47,6 +47,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "CreateCategory",
   data: function data() {
@@ -55,14 +56,15 @@ __webpack_require__.r(__webpack_exports__);
         name: null
       },
       categories: null,
-      editSlug: null
+      editSlug: null,
+      errors: null
     };
   },
   created: function created() {
     var _this = this;
 
     if (!User.admin()) {
-      this.$router.push('/forum');
+      this.$router.push("/forum");
     }
 
     axios.get("/api/category").then(function (res) {
@@ -80,6 +82,8 @@ __webpack_require__.r(__webpack_exports__);
         _this2.categories.unshift(res.data);
 
         _this2.form.name = null;
+      })["catch"](function (error) {
+        return _this2.errors = error.response.data.errors;
       });
     },
     update: function update() {
@@ -102,6 +106,11 @@ __webpack_require__.r(__webpack_exports__);
       this.form.name = this.categories[index].name;
       this.editSlug = this.categories[index].slug;
       this.categories.splice(index, 1);
+    }
+  },
+  computed: {
+    disabled: function disabled() {
+      return !this.form.name;
     }
   }
 });
@@ -126,6 +135,12 @@ var render = function() {
   return _c(
     "v-container",
     [
+      _vm.errors
+        ? _c("v-alert", { attrs: { type: "error", value: true } }, [
+            _vm._v("Please enter the category name")
+          ])
+        : _vm._e(),
+      _vm._v(" "),
       _c(
         "v-form",
         {
@@ -149,12 +164,28 @@ var render = function() {
           }),
           _vm._v(" "),
           _vm.editSlug
-            ? _c("v-btn", { attrs: { color: "pink", type: "submit" } }, [
-                _vm._v("Update")
-              ])
-            : _c("v-btn", { attrs: { color: "teal", type: "submit" } }, [
-                _vm._v("Create")
-              ])
+            ? _c(
+                "v-btn",
+                {
+                  attrs: {
+                    color: "pink",
+                    type: "submit",
+                    disabled: _vm.disabled
+                  }
+                },
+                [_vm._v("Update")]
+              )
+            : _c(
+                "v-btn",
+                {
+                  attrs: {
+                    color: "teal",
+                    type: "submit",
+                    disabled: _vm.disabled
+                  }
+                },
+                [_vm._v("Create")]
+              )
         ],
         1
       ),

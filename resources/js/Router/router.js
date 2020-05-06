@@ -6,7 +6,8 @@ Vue.use(Router);
 const routes = [
     {
         path: "/",
-        redirect: "/forum",
+        component: () =>
+        import('../components/Parallax'),
     },
     {
         path: "/login",

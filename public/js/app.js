@@ -2104,12 +2104,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       unreadCount: 0,
       read: {},
-      unread: {}
+      unread: {},
+      sound: "http://soundbible.com/mp3/glass_ping-Go445-1207030150.mp3"
     };
   },
   methods: {
@@ -2120,20 +2123,28 @@ __webpack_require__.r(__webpack_exports__);
         _this.read = res.data.read;
         _this.unread = res.data.unread;
         _this.unreadCount = res.data.unread.length;
+      })["catch"](function (error) {
+        return Exception.handleError(error);
       });
     },
-    readnotification: function readnotification(notification) {
+    readnotification: function readnotification(notification, index) {
       var _this2 = this;
 
       axios.post("/api/markAsRead", {
         id: notification.id
       }).then(function (res) {
-        _this2.unread.splice(notification, 1);
+        _this2.unread.splice(index, 1);
 
         _this2.read.push(notification);
 
         _this2.unreadCount--;
+      })["catch"](function (error) {
+        return Exception.handleError(error);
       });
+    },
+    playSound: function playSound() {
+      var alert = new Audio(this.sound);
+      alert.play();
     }
   },
   computed: {
@@ -2147,6 +2158,8 @@ __webpack_require__.r(__webpack_exports__);
     if (User.loggedIn()) {
       this.getNotifications();
       Echo["private"]("App.User." + User.id()).notification(function (notification) {
+        _this3.playSound();
+
         _this3.unread.unshift(notification);
 
         _this3.unreadCount++;
@@ -2179,6 +2192,10 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToAr
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
+//
+//
+//
+//
 //
 //
 //
@@ -43709,7 +43726,7 @@ var render = function() {
           _c(
             "v-list",
             [
-              _vm._l(_vm.unread, function(notification) {
+              _vm._l(_vm.unread, function(notification, index) {
                 return _c(
                   "v-list-item",
                   { key: notification.id },
@@ -43723,7 +43740,7 @@ var render = function() {
                           {
                             on: {
                               click: function($event) {
-                                return _vm.readnotification(notification)
+                                return _vm.readnotification(notification, index)
                               }
                             }
                           },
@@ -43785,15 +43802,25 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "v-card",
-    { attrs: { color: "grey lighten-4", text: "", height: "50px", tile: "" } },
+    { attrs: { color: "grey lighten-4", text: "", height: "70px", tile: "" } },
     [
       _c(
         "v-toolbar",
-        { attrs: { dense: "" } },
+        { attrs: { color: "indigo", height: "70px", dark: "" } },
         [
           _c("v-app-bar-nav-icon"),
           _vm._v(" "),
-          _c("v-toolbar-title", [_vm._v("Title")]),
+          _c(
+            "v-toolbar-title",
+            [
+              _c(
+                "router-link",
+                { staticClass: "white--text", attrs: { to: "/" } },
+                [_vm._v("\n            24Seven Devs\n        ")]
+              )
+            ],
+            1
+          ),
           _vm._v(" "),
           _c("v-spacer"),
           _vm._v(" "),
@@ -100814,6 +100841,50 @@ var AppStorage = /*#__PURE__*/function () {
 
 /***/ }),
 
+/***/ "./resources/js/Helpers/Exception.js":
+/*!*******************************************!*\
+  !*** ./resources/js/Helpers/Exception.js ***!
+  \*******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _User__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./User */ "./resources/js/Helpers/User.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+
+var Exception = /*#__PURE__*/function () {
+  function Exception() {
+    _classCallCheck(this, Exception);
+  }
+
+  _createClass(Exception, [{
+    key: "handleError",
+    value: function handleError(error) {
+      this.isExpired(error.response.data);
+    }
+  }, {
+    key: "isExpired",
+    value: function isExpired(error) {
+      if (error == 'Token is Invalid' || error == 'Token expired') {
+        _User__WEBPACK_IMPORTED_MODULE_0__["default"].logout();
+      }
+    }
+  }]);
+
+  return Exception;
+}();
+
+/* harmony default export */ __webpack_exports__["default"] = (Exception = new Exception());
+
+/***/ }),
+
 /***/ "./resources/js/Helpers/Token.js":
 /*!***************************************!*\
   !*** ./resources/js/Helpers/Token.js ***!
@@ -100854,7 +100925,20 @@ var Token = /*#__PURE__*/function () {
   }, {
     key: "decode",
     value: function decode(payload) {
-      return JSON.parse(atob(payload));
+      if (this.isBase64(payload)) {
+        return JSON.parse(atob(payload));
+      } else {
+        return false;
+      }
+    }
+  }, {
+    key: "isBase64",
+    value: function isBase64(str) {
+      try {
+        return btoa(atob(str)).replace(/=/g, "") == str;
+      } catch (error) {
+        return false;
+      }
     }
   }]);
 
@@ -100918,7 +101002,7 @@ var User = /*#__PURE__*/function () {
       var storedToken = _AppStorage__WEBPACK_IMPORTED_MODULE_1__["default"].getToken();
 
       if (storedToken) {
-        return _Token__WEBPACK_IMPORTED_MODULE_0__["default"].isValid(storedToken) ? true : false;
+        return _Token__WEBPACK_IMPORTED_MODULE_0__["default"].isValid(storedToken) ? true : this.logout();
       }
 
       return false;
@@ -100985,7 +101069,9 @@ __webpack_require__.r(__webpack_exports__);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]);
 var routes = [{
   path: "/",
-  redirect: "/forum"
+  component: function component() {
+    return __webpack_require__.e(/*! import() */ 6).then(__webpack_require__.bind(null, /*! ../components/Parallax */ "./resources/js/components/Parallax.vue"));
+  }
 }, {
   path: "/login",
   component: function component() {
@@ -101049,13 +101135,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuetify__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuetify */ "./node_modules/vuetify/dist/vuetify.js");
 /* harmony import */ var vuetify__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(vuetify__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _Helpers_User__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Helpers/User */ "./resources/js/Helpers/User.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var vue_simplemde__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! vue-simplemde */ "./node_modules/vue-simplemde/src/index.vue");
-/* harmony import */ var marked__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! marked */ "./node_modules/marked/src/marked.js");
-/* harmony import */ var marked__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(marked__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var _components_AppHome_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/AppHome.vue */ "./resources/js/components/AppHome.vue");
-/* harmony import */ var _Router_router_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./Router/router.js */ "./resources/js/Router/router.js");
+/* harmony import */ var _Helpers_Exception__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Helpers/Exception */ "./resources/js/Helpers/Exception.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var vue_simplemde__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! vue-simplemde */ "./node_modules/vue-simplemde/src/index.vue");
+/* harmony import */ var marked__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! marked */ "./node_modules/marked/src/marked.js");
+/* harmony import */ var marked__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(marked__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var _components_AppHome_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/AppHome.vue */ "./resources/js/components/AppHome.vue");
+/* harmony import */ var _Router_router_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./Router/router.js */ "./resources/js/Router/router.js");
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
 window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
@@ -101064,20 +101151,22 @@ window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.
 
 
 
+
 window.User = _Helpers_User__WEBPACK_IMPORTED_MODULE_2__["default"];
-window.axios = axios__WEBPACK_IMPORTED_MODULE_3__;
+window.Exception = _Helpers_Exception__WEBPACK_IMPORTED_MODULE_3__["default"];
+window.axios = axios__WEBPACK_IMPORTED_MODULE_4__;
 window.EventBus = new vue__WEBPACK_IMPORTED_MODULE_0___default.a();
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vuetify__WEBPACK_IMPORTED_MODULE_1___default.a);
-vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_simplemde__WEBPACK_IMPORTED_MODULE_4__["default"]);
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_simplemde__WEBPACK_IMPORTED_MODULE_5__["default"]);
 
-window.md = marked__WEBPACK_IMPORTED_MODULE_5___default.a;
+window.md = marked__WEBPACK_IMPORTED_MODULE_6___default.a;
 
-vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('AppHome', _components_AppHome_vue__WEBPACK_IMPORTED_MODULE_6__["default"]);
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('AppHome', _components_AppHome_vue__WEBPACK_IMPORTED_MODULE_7__["default"]);
 
 var app = new vue__WEBPACK_IMPORTED_MODULE_0___default.a({
   vuetify: new vuetify__WEBPACK_IMPORTED_MODULE_1___default.a(),
   el: '#app',
-  router: _Router_router_js__WEBPACK_IMPORTED_MODULE_7__["default"]
+  router: _Router_router_js__WEBPACK_IMPORTED_MODULE_8__["default"]
 });
 
 /***/ }),
