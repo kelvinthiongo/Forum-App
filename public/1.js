@@ -72,26 +72,39 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      questions: {}
+      questions: {},
+      meta: {}
     };
   },
   components: {
     question: _question__WEBPACK_IMPORTED_MODULE_0__["default"],
     AppSidebar: _AppSideBar__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
-  created: function created() {
-    var _this = this;
+  methods: {
+    changePage: function changePage(page) {
+      var url = "/api/question?page=".concat(page);
+      this.fetchQuestions(url);
+    },
+    fetchQuestions: function fetchQuestions(url) {
+      var _this = this;
 
-    axios.get('/api/question').then(function (res) {
-      return _this.questions = res.data.data;
-    })["catch"](function (error) {
-      return Exception.handleError(error);
-    });
+      axios.get(url).then(function (res) {
+        _this.questions = res.data.data;
+        _this.meta = res.data.meta;
+      })["catch"](function (error) {
+        return Exception.handleError(error);
+      });
+    }
+  },
+  created: function created() {
+    var url = "/api/question";
+    this.fetchQuestions(url);
   }
 });
 
@@ -225,13 +238,28 @@ var render = function() {
           _c(
             "v-flex",
             { attrs: { xs8: "" } },
-            _vm._l(_vm.questions, function(question) {
-              return _c("question", {
-                key: question.path,
-                attrs: { question: question }
+            [
+              _vm._l(_vm.questions, function(question) {
+                return _c("question", {
+                  key: question.path,
+                  attrs: { question: question }
+                })
+              }),
+              _vm._v(" "),
+              _c("v-pagination", {
+                staticClass: "my-4",
+                attrs: { length: _vm.meta.last_page },
+                on: { input: _vm.changePage },
+                model: {
+                  value: _vm.meta.current_page,
+                  callback: function($$v) {
+                    _vm.$set(_vm.meta, "current_page", $$v)
+                  },
+                  expression: "meta.current_page"
+                }
               })
-            }),
-            1
+            ],
+            2
           ),
           _vm._v(" "),
           _c("v-flex", { attrs: { xs4: "" } }, [_c("app-sidebar")], 1)
